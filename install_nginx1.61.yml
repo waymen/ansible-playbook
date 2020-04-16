@@ -1,0 +1,132 @@
+---
+- hosts: "{{ host }}"
+  gather_facts: true
+  remote_user: root
+  connection: ssh         # defalut
+  vars:
+    - NGINX_TAR: nginx-1.16.1.tar.gz
+    - PCRE_TAR: pcre-8.44.tar.gz
+    - NGINX_TARDIR: "{{ NGINX_TAR | splitext | first | splitext | first }}" # nginx-1.16.1
+    - PCRE_TARDIR: "{{ PCRE_TAR | splitext | first | splitext | first }}"   # pcre-8.44
+    - NGINX_HOME: /opt/app/nginx
+    - NGINX_VHOSTS: "{{ NGINX_HOME }}/vhosts"
+    - NGINX_OWNER: nginx
+    - NGINX_GROUP:  "{{ NGINX_OWNER }}"
+    - BUILD_DIR: /tmp
+    - processor_vcpus: "{{ ansible_processor_vcpus }}"
+    - NGINX_LOGDIR: 
+
+  tasks:
+    - name: 安装依赖包
+      tags: install_package
+      yum:
+        name: "{{ packages }}" 
+        state: latest
+      vars:
+        packages:
+          - openssl-devel
+          - openssl
+          - make
+          - gcc 
+          - gcc-c++ 
+          - make 
+          - automake 
+          - autoconf
+          - zlib 
+          - zlib-devel
+
+    - name: 创建组
+      tags: create_group
+      group:
+        name: "{{ NGINX_GROUP }}"
+        state: present
+
+    - name: 创建用户
+      tags: create_user
+      user:
+        name: "{{ NGINX_OWNER }}"
+        comment: "Nginx server"
+        shell: "/sbin/nologin"
+        create_home: false
+
+    - name: 上传并解压nginx与pcre包
+      tags: upload
+      unarchive:
+        src: "files/{{ item }}"
+        dest: "{{ BUILD_DIR }}"
+        copy: yes
+      loop:
+        - "{{ NGINX_TAR }}"
+        - "{{ PCRE_TAR }}"
+
+    - name: 编译安装pcre
+      tags: install_pcre
+      shell: 
+        cd "{{ BUILD_DIR }}/{{ PCRE_TARDIR }}" && \
+        ./configure && make -j2 && make install
+        
+    - name: 编译安装nginx
+      tags: install_nginx
+      shell: 
+        cd {{ BUILD_DIR }}/{{ NGINX_TARDIR }} && \
+        ./configure --prefix={{ NGINX_HOME }} \
+        --user={{ NGINX_OWNER }} \
+        --group={{ NGINX_GROUP }} \
+        --with-pcre={{ BUILD_DIR }}/{{ PCRE_TARDIR }} \
+        --with-stream \
+        --with-http_ssl_module \
+        --with-http_stub_status_module \
+        --with-http_gzip_static_module && \
+        make -j2 && make install && exit
+
+    - name: 创建vhosts目录
+      file:
+        path: "{{ NGINX_VHOSTS }}"
+        state: directory
+        mode: '0755'
+    
+    - name: nginx.conf配置
+      template:
+        src: templates/nginx.conf.j2
+        dest: "{{ NGINX_HOME }}/conf/nginx.conf"
+
+    - name: 添加启动脚本(rhel/centos6)
+      tags: add_c6
+      template:
+        src: templates/nginx.init.j2
+        dest: /etc/init.d/nginx
+        mode: u+x
+      when: ansible_distribution_major_version|int == 6
+
+    - name: 添加启动脚本(rhel/centos7+)
+      tags: add_c7
+      template:
+        src: templates/nginx.service.j2
+        dest: /lib/systemd/system/nginx.service
+      when: ansible_distribution_major_version|int >= 7
+
+    - name: 启动服务(rhel/centos6)
+      tags: start_6
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+      when: ansible_distribution_major_version|int == 6
+    
+    - name: 启动服务(rhel/centos7+)
+      tags: start_7
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes
+      when: ansible_distribution_major_version|int >= 7
+      
+    - name: 删除编译后的文件
+      tags: clean_temp
+      file: 
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ BUILD_DIR }}/{{ NGINX_TARDIR }}"
+        - "{{ BUILD_DIR }}/{{ PCRE_TARDIR }}"
+      
