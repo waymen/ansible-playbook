@@ -1,0 +1,48 @@
+---
+- hosts: "{{ hosts }}"
+  remote_user: root
+  gather_facts: false
+  vars:
+    - var1: "abc"
+    - a: "aaaa"
+    - b: "bbb"
+    - MYSQL_TAR: percona-server-5.7.29-32.tar.gz
+    - MYSQL_TARDIR: "{{ MYSQL_TAR | splitext | first | splitext | first }}"
+
+  # debug模块用于打印信息、调试变量或表达式。与when指令一起调试非常有用，也支持windows系统
+  # 该模块可以接受三个参数
+  # msg: 打印自定义字符串，默认值为"Hello world!"，类型是string
+  # var：要调试的变量名，不能和msg参数同时使用。可以在jina中使用，类型是string
+  # verbosity: 控制debug的运行级别，输出不同的信息，默认为0，类型是int
+  # see: https://docs.ansible.com/ansible/latest/modules/debug_module.html
+
+  tasks:
+    - name: 第一个demo   # 打印单行
+      debug: msg="hello word"
+   
+    - name: debug demo2   # 打印多行, msg后面是个列表
+      debug: 
+          msg:
+            - hello alex
+            - hello jason
+            - hello mike
+
+    - name: debug demo3  # 打印var1变量的值
+      debug: var=var1
+    
+    - name: debug demo4
+      command: uptime
+      register: result   # 注册器，将上面uptime命令的输出结果赋值给result变量
+   
+    - name: debug demo5  # 打印result变量值, 返回详细的信息, 类似于一个字典
+      debug: var=result
+    
+    - name: debug demo5  # 取result变量(字典)stdout键的值
+      debug: var=result.stdout
+
+    - name: debug demo6
+      debug: msg="{{ item }}"
+      loop:
+        - "{{ a }}"
+        - "{{ b }}"
+        - "{{ MYSQL_TARDIR }}"
