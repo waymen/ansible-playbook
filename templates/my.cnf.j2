@@ -1,0 +1,24 @@
+[client]
+port={{ MYSQL_PORT }}
+socket={{ MYSQL_DATADIR }}/mysql.sock  # socket
+
+[mysqld]
+port={{ MYSQL_PORT }}
+basedir={{ MYSQL_BASEDIR  }}
+datadir={{ MYSQL_DATADIR }}
+socket={{ MYSQL_DATADIR }}/mysql.sock
+user={{ MYSQL_USER }}
+default-storage-engine=innodb
+character-set-server=utf8mb4
+pid-file={{ MYSQL_DATADIR }}/mysqld.pid      
+log-error={{ MYSQL_LOGDIR }}/mysqld-err.log  
+skip-ssl                                     # skip ssl
+sql_mode = STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+symbolic-links=0                             # default
+max_connections=200                          # default: 100
+innodb-file-per-table=1                      # default
+#innodb-buffer-pool-size=                    # set 50%～80% default: 128m
+
+[mysqld_safe]
+symbolic-links=0
+pid-file={{ MYSQL_LOGDIR }}/mysqld-err.log
