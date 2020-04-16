@@ -1,0 +1,25 @@
+--- 
+- hosts: all
+  gather_facts: false
+  remote_user: root
+  vars:
+    - REDIS_HOME: /usr/local/redis
+    - var2: value2
+    - var3: value3
+
+  tasks:
+    - name: install gcc
+      yum: name=gcc state=latest
+
+    - name: upload redis
+      unarchive: src=files/redis-3.2.1.tar.gz  dest=/usr/local/src
+
+    - name: make and make install
+      shell: cd /usr/local/src &&  mv redis-3.2.1 {{ REDIS_HOME }} && \
+             cd {{ REDIS_HOME }} && make -j2 && make install
+
+    - name: Core setting
+      shell: echo never > /sys/kernel/mm/transparent_hugepage/enabled && \
+             echo '511' > /proc/sys/net/core/somaxconn && \
+             sysctl vm.overcommit_memory=1
+
