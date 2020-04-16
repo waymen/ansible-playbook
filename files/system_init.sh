@@ -60,7 +60,7 @@ elif [[ $VERSION == 7 ]]; then
 fi
 
 echo "-----Install package-----"
-yum install -y curl net-tools gcc gcc-c++ make autoconf vim-enhanced tmux lrzsz ntpdate unzip openssh-clients
+yum install -y curl net-tools gcc gcc-c++ make autoconf vim-enhanced tmux lrzsz ntpdate unzip openssh-clients dos2unix tree telnet lsof
 
 echo "-----Settings NTP------"
 /usr/sbin/ntpdate ntp1.aliyun.com
