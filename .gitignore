@@ -2,3 +2,4 @@ templates/.DS_Store
 files/*.tar.gz
 files/*.zip
 files/*.bz2
+.DS_Store
