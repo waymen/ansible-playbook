@@ -1,1 +1,5 @@
-
+---
+- hosts: "{{ host }}"
+  connection: ssh
+  remote_user: root
+  
