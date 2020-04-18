@@ -1,0 +1,11 @@
+---
+- hosts: "{{ host }}"
+  gather_facts: true
+  remote_user: root
+  connecton: ssh
+  
+  tasks:
+    - name: 检查openssl版本是否低于1.1.1
+      tags: check_version
+      shell: 
+      register: openssl_version
