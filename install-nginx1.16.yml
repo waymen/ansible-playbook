@@ -46,6 +46,7 @@
       user:
         name: "{{ NGINX_OWNER }}"
         comment: "Nginx server"
+        group: "{{ NGINX_OWNER }}"
         shell: "/sbin/nologin"
         create_home: false
 
