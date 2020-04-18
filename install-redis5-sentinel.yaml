@@ -1,0 +1,13 @@
+---
+gather_facts: true
+connection: ssh
+remote_user: root
+
+- name:
+  hosts: "{{ host }}"
+  tasks:
+    - name: xxx
+      tags: 
+
+    - name: xxx
+      tags: 
