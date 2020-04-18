@@ -1,7 +1,9 @@
 --- 
-- hosts: all
+- hosts: "{{ host }}"
   gather_facts: false
   remote_user: root
+  connection: ssh
+  
   vars:
     - REDIS_HOME: /usr/local/redis
     - var2: value2
