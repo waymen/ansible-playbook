@@ -1,0 +1,14 @@
+---
+- hosts: "{{ hosts }}"
+  gather_facts: true
+  connection: ssh
+  remote_user: root
+  vars:
+    - JDK_TAR: 
+
+  tasks:
+    - name: upload
+      tags: 
+
+    - name: 添加环境变量
+      tags: 
