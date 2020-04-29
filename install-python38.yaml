@@ -1,9 +1,0 @@
----
-- hosts: "{{ host }}"
-  gather_facts: true
-  connection: ssh
-  remote_user: root
-
-记得
-vi /usr/libexec/urlgrabber-ext-down 
-把 #! /usr/bin/python 修改为 #! /usr/bin/python2
