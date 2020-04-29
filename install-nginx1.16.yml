@@ -6,8 +6,8 @@
   vars:
     - NGINX_TAR: nginx-1.16.1.tar.gz
     - PCRE_TAR: pcre-8.44.tar.gz
-    - NGINX_TARDIR: "{{ NGINX_TAR | splitext | first | splitext | first }}" # nginx-1.16.1
-    - PCRE_TARDIR: "{{ PCRE_TAR | splitext | first | splitext | first }}"   # pcre-8.44
+    - NGINX_TARDIR: "{{ NGINX_TAR | splitext | first | splitext | first }}" # nginx-version
+    - PCRE_TARDIR: "{{ PCRE_TAR | splitext | first | splitext | first }}"   # pcre-version
     - NGINX_HOME: /opt/app/nginx
     - NGINX_VHOSTS: "{{ NGINX_HOME }}/vhosts"
     - NGINX_OWNER: nginx
@@ -24,7 +24,6 @@
         state: latest
       vars:
         packages:
-          - openssl-devel
           - openssl
           - make
           - gcc 
@@ -81,18 +80,20 @@
         make -j2 && make install && exit
 
     - name: 创建vhosts目录
+      tags: create-vhosts
       file:
         path: "{{ NGINX_VHOSTS }}"
         state: directory
         mode: '0755'
     
     - name: nginx.conf配置
+      tags: nginx-conf
       template:
         src: templates/nginx.conf.j2
         dest: "{{ NGINX_HOME }}/conf/nginx.conf"
 
     - name: 添加启动脚本(rhel/centos6)
-      tags: add_c6
+      tags: add_sysv
       template:
         src: templates/nginx.init.j2
         dest: /etc/init.d/nginx
@@ -100,14 +101,14 @@
       when: ansible_distribution_major_version|int == 6
 
     - name: 添加启动脚本(rhel/centos7+)
-      tags: add_c7
+      tags: add_systemd
       template:
         src: templates/nginx.service.j2
         dest: /lib/systemd/system/nginx.service
       when: ansible_distribution_major_version|int >= 7
 
     - name: 启动服务(rhel/centos6)
-      tags: start_6
+      tags: start_sysv
       service:
         name: nginx
         state: started
@@ -115,7 +116,7 @@
       when: ansible_distribution_major_version|int == 6
     
     - name: 启动服务(rhel/centos7+)
-      tags: start_7
+      tags: start_systemd
       systemd:
         name: nginx
         state: started

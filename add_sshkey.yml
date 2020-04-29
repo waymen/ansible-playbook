@@ -5,7 +5,7 @@
   connection: ssh    # defalut
 
   tasks:
-    - name: Upload the id_rsa.pub file to remote hosts.
+    - name: Upload the id_rsa.pub file to remote hosts.
       tags: upload_rsa.pub
       copy: src=~/.ssh/id_rsa.pub dest=/root/.ssh/
 
