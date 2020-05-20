@@ -1,0 +1,7 @@
+---
+- name: 添加java_环境变量
+  tags: add-env, install
+  template:
+    src: java.sh.j2
+    dest: /etc/profile.d/java.sh
+...

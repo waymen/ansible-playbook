@@ -1,0 +1,6 @@
+---
+jdk_tar: jdk-11.0.6_linux-x64_bin.tar.gz
+java_home: /usr/local/jdk
+jdk_dir: "{{ jdk_tar.split('.tar.gz')[0] }}"  # jdk-11.0.6_inux-x64_bin
+temp_dir: /usr/local/src
+...

@@ -1,0 +1,12 @@
+---
+- name: 获取版本信息
+  tags: get-version, install
+  ignore_errors: yes
+  command: "{{ java_home }}/bin/java -version"
+  register: version
+
+- name: 打印版本信息
+  tags: get-version, print-version, install
+  debug: 
+    msg: "{{ version.stderr_lines[0] }}"
+...

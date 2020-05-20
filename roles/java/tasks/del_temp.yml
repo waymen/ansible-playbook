@@ -1,0 +1,5 @@
+- name: 删除解压后的文件
+  tags: del-temp, install
+  file:
+    path: "{{ temp_dir }}/{{ jdk_dir }}"
+    state: absent

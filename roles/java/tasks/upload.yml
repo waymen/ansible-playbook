@@ -1,0 +1,14 @@
+---
+- name: "上传jdk"
+  tags: upload-java, upload, install
+  unarchive:
+    src: "{{ jdk_tar }}"
+    dest: "{{ temp_dir }}" 
+
+- name: "移动包至{{ java_home }}"
+  tags: mv-javahome, upload, install
+  copy:
+    src: "{{ temp_dir }}/{{ jdk_dir }}/"
+    dest: "{{ java_home }}"
+    remote_src: yes
+...

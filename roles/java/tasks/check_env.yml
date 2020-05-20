@@ -1,0 +1,13 @@
+---
+- name: 获取java_home目录信息
+  tags: check-env, get-javahome, install
+  stat:
+    path: "{{ java_home }}"
+  register: info
+
+- name: "检查java_home: {{ java_home }}是否存在"
+  tags: check-env, check-javahome, install
+  fail:
+    msg: "java_home: {{ java_home }}已经存在"
+  when: info.stat.exists and info.stat.isdir
+...

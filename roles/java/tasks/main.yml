@@ -1,0 +1,7 @@
+---
+- include_task: check_env.yml
+- include_task: upload.yml
+- include_task: add_env.yml
+- include_task: get_version.yml
+- include_task: del_temp.yml
+...
