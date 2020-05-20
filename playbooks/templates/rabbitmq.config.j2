@@ -1,0 +1,12 @@
+{% if enable_proxy_protocol %}
+[
+  {rabbit, [
+    {proxy_protocol, true}
+  ]}
+].
+{% else %}
+[
+  {rabbit, [
+  ]}
+].
+{% endif %}

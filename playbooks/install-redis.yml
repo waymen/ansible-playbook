@@ -1,0 +1,34 @@
+--- 
+- hosts: "{{ host }}"
+  gather_facts: false
+  remote_user: root
+  connection: ssh
+  vars:
+    - redis_tar: redis-5.0.8.tar.gz
+    - redis_owner: redis
+    - redis_group: "{{ redis_owner }}"
+    - redis_home: /opt/app/redis
+    - redis_port: 6379
+    - password: "{{ password }}"
+    - redis_dir: /data/redis
+    - redis_pid: 
+    - redis_logdir: /data/log/redis
+
+  tasks:
+    - name: 获取文件redis_home
+      stat:
+        path: "{{ redis_home }}"
+      register: info
+    
+    - name: reids是否启动
+
+    - name: 判断文件是否存在
+      fail: 
+        msg: "redis_home: {{ redis_home }} 已经存在"
+      when: info.stat.exists and info.stat.isdir
+    
+    - name: debug_test
+      debug:
+        msg: "xxxxxxxxxxxxxxxxx"
+     
+

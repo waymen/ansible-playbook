@@ -1,0 +1,5 @@
+# 同时更新openssl与pyton3， pyton3.8依赖于1.0.2的openssl版本
+# 直接导入playbook
+---
+- import_playbook: update-openssl.yml
+- import_playbook: update-python.yml

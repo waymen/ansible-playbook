@@ -1,0 +1,99 @@
+# 安装rabbitmq-server单机版，erlang版本22.x, rabbitmq版本为最新
+---
+- hosts: "{{ host }}"
+  gather_facts: false
+  remote_user: root
+  connection: ssh          # default
+
+  vars:
+    rabbitmq_owner: rabbitmq         # 拥有者
+    hostname_prefix: rabbitmq        # 前缀
+    RABBITMQ_DATADIR: /data/rabbitmq
+    RABBITMQ_MNESIA_BASE: "{{ RABBITMQ_DATADIR }}/mnesia"      # defalut: /var/lib/rabbitmq，数据目录
+    RABBITMQ_SCHEMA_DIR: "{{ RABBITMQ_DATADIR }}/schema"
+    RABBITMQ_PLUGINS_EXPAND_DIR: "{{ RABBITMQ_DATADIR }}/plugins"  # 插件目录
+    enable_rabbitmq_webui_plugin: true        # 默认启用web管理插件
+    enable_proxy_protocol: false              # 默认不启用四层代理
+
+  tasks:
+    - name: 上传erlang与rabbitmq-server的repo库
+      tags: upload-repo
+      copy:
+        src: "files/{{ item }}"
+        dest: /etc/yum.repos.d
+        backup: yes
+      loop:
+        - rabbitmq-erlang.repo 
+        - rabbitmq-server.repo 
+        
+    - name: 设置主机名
+      tags: set-hostname
+      hostname:
+        name: "{{ hostname_prefix }}{{ inventory_hostname.split('.')[-1] }}"
+
+    - name: 设置主机名与ip对应关系
+      tags: ip-hostname
+      lineinfile:
+        path: /etc/hosts
+        line: "{{ inventory_hostname }} {{host_name}}"
+      vars:
+        host_name: "{{ hostname_prefix }}{{ inventory_hostname.split('.')[-1] }}"
+
+    - name: 安装rabbitmq-server
+      tags: install-rabbitmq
+      yum:
+        name: rabbitmq-server
+        state: present
+    
+    - name: 创建rabbitmq根数据目录
+      tags: create-basedata
+      file:
+        path: "{{ RABBITMQ_DATADIR }}"
+        state: directory
+        mode: 0755
+
+    - name: 创建rabbitmq相关数据目录
+      tags: create-datadir
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ rabbitmq_owner }}"
+        mode: 0755
+      loop:
+        - "{{ RABBITMQ_MNESIA_BASE }}"
+        - "{{ RABBITMQ_SCHEMA_DIR }}"
+        - "{{ RABBITMQ_PLUGINS_EXPAND_DIR }}"
+      
+    - name: 准备配置文件
+      tags: 
+        - rabbitmq-config
+        - config
+      template: 
+        src: "templates/{{ item.src }}" 
+        dest: "/etc/rabbitmq/{{ item.dest }}"
+        backup: yes
+      loop:
+        - {src: rabbitmq.config.j2 , dest: rabbitmq.config}
+        - {src: rabbitmq-env.conf.j2 , dest: rabbitmq-env.conf}
+      notify:
+        - restart reabbitmq-server
+        - enable rabbitmq_management plugin
+
+  handlers:
+    # 启动服务
+    - name: restart reabbitmq-server
+      tags: restart-rabbit
+      service:
+        name: rabbitmq-server
+        state: restarted
+        enabled: yes
+        
+    # 启用插件
+    - name: enable rabbitmq_management plugin
+      tags: enable-plugin
+      rabbitmq_plugin:
+        names: rabbitmq_management
+        state: enabled
+      when: enable_rabbitmq_webui_plugin
+...
+    

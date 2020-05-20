@@ -1,0 +1,74 @@
+# 更新openssl，默认为1.1.1版本
+
+---
+- hosts: "{{ host }}"
+  gather_facts: true
+  remote_user: root
+  connection: ssh    # defalut
+
+  vars:
+    - openssl_tar: openssl-1.1.1f.tar.gz
+    - openssl_home: /usr/local/openssl
+    - build_dir: /tmp
+
+  tasks:
+    - name: "探测openssl_home:{{ openssl_home }}"
+      tags: discover
+      stat:
+        path:  "{{ openssl_home }}"
+      register: info
+    
+    - name: "检查openssl_home:{{ openssl_home }}是否存在"
+      tags: check-openssl
+      fail:
+        msg: "openssl_home:{{ openssl_home }}已经安装"  # 条件符合抛异常, 标记为failed, 后面的task不会执行
+      when: info.stat.exists and info.stat.isdir
+
+    - name: 安装依赖
+      tags: install-package
+      yum:
+        name: [gcc, make, zlib-devel, openssl, openssl-devel, curl]
+        state: present
+    
+    - name: 上传并解压openssl包
+      tags: upload
+      unarchive:
+        src: "files/{{ openssl_tar }}"
+        dest: "{{ build_dir }}"
+    
+    - name: 编译安装
+      tags: build
+      shell: 
+        cmd: ./config --prefix={{ openssl_home | quote }} --openssldir={{ openssl_home | quote }} shared zlib && make -j {{ ansible_processor_vcpus | int | quote }} && make install;
+        chdir: "{{ build_dir }}/{{ openssl_source_dir }}"
+      vars:
+        openssl_source_dir: "{{ openssl_tar | splitext | first | splitext | first }}"
+    
+    - name: 添加lib库配置文件与环境变量
+      tags: env
+      template:
+        src: "templates/{{ item.src }}"
+        dest: "{{ item.dest }}"
+        backup: yes
+      loop:
+        - {src: openssl.ldconf.j2, dest: /etc/ld.so.conf.d/openssl.conf }
+        - {src: openssl.sh.j2 , dest: /etc/profile.d/openssl.sh }
+
+    - name: ldconfig创建动态库链接
+      command: ldconfig
+  
+    - name: 创建include链接
+      tags: create-include
+      shell: 
+        cmd: \mv /usr/include/openssl /usr/include/openssl.bak && ln -s {{ openssl_home }}/include/openssl /usr/include 
+        removes: /usr/include/openssl
+
+    - name: 清除编译后的文件
+      tags: clean-temp
+      file:
+        path: "{{ build_dir }}/{{ openssl_source_dir }}"
+        state: absent
+      vars:
+        openssl_source_dir: "{{ openssl_tar | splitext | first | splitext | first }}"
+
+    

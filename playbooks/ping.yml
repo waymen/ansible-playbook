@@ -1,0 +1,10 @@
+---
+- hosts: "{{ host }}"
+  gather_facts: false
+  remote_user: root
+  connection: ssh    # defalut
+  
+  tasks:
+    - name: 远程主机连通性
+      tags: ping_hosts
+      ping:

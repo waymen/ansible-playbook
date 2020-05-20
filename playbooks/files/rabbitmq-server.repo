@@ -1,0 +1,16 @@
+[rabbitmq_rabbitmq-server]
+name=rabbitmq_rabbitmq-server
+baseurl=http://packagecloud.io/rabbitmq/rabbitmq-server/el/$releasever/$basearch
+repo_gpgcheck=0
+gpgcheck=0
+enabled=1
+gpgkey=https://packagecloud.io/rabbitmq/rabbitmq-server/gpgkey
+
+
+[rabbitmq_rabbitmq-server-source]
+name=rabbitmq_rabbitmq-server-source
+baseurl=http://packagecloud.io/rabbitmq/rabbitmq-server/el/$releasever/SRPMS
+repo_gpgcheck=0
+gpgcheck=0
+enabled=1
+gpgkey=https://packagecloud.io/rabbitmq/rabbitmq-server/gpgkey

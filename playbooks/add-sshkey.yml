@@ -1,0 +1,15 @@
+# 为root用户添加ssh密钥对，免密钥登陆
+---
+- hosts: "{{ host }}"
+  gather_facts: false
+  remote_user: root
+  connection: ssh    # defalut
+
+  tasks:
+    - name: Upload the id_rsa.pub file to remote hosts.
+      tags: upload_rsa.pub
+      copy: src=~/.ssh/id_rsa.pub dest=/root/.ssh/
+
+    - name: Write to authorized_keys
+      tags: write_authorized_keys
+      shell: cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys

@@ -1,0 +1,7 @@
+[rabbitmq-erlang]
+name=rabbitmq-erlang
+baseurl=http://dl.bintray.com/rabbitmq-erlang/rpm/erlang/22/el/$releasever
+gpgcheck=0
+gpgkey=https://dl.bintray.com/rabbitmq/Keys/rabbitmq-release-signing-key.asc
+repo_gpgcheck=0
+enabled=1
