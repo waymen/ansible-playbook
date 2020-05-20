@@ -3,5 +3,5 @@
   remote_user: root
   gather_facts: false
   roles:
-    - role: java
+    - { role: java, tags: install }
 ...
