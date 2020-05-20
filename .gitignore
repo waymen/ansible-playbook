@@ -1,5 +1,6 @@
 templates/.DS_Store
-files/*.tar.gz
-files/*.zip
-files/*.bz2
+playbooks/files/*.tar.gz
+playbooks/files/*.zip
+playbooks/files/*.bz2
+roles/java/files/*.tar.gz
 .DS_Store
